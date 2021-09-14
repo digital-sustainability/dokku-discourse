@@ -19,17 +19,42 @@ if __name__ == "__main__":
     smtp_port = sys.argv[5]
     smtp_user_name = sys.argv[6]
     smtp_password = sys.argv[7]
+    db_host = sys.argv[8]
+    db_port = sys.argv[9]
+    db_name = sys.argv[10]
+    db_username = sys.argv[11]
+    db_password = sys.argv[12]
 
     with open(config_file, "r") as f:
         data = load(f, Loader=Loader)
-        data["env"] = {
-            "LANG": lang,
-            "DISCOURSE_DEFAULT_LOCALE": default_locale,
-            "DISCOURSE_HOSTNAME": hostname,
-            "DISCOURSE_DEVELOPER_EMAILS": developer_emails,
-            "DISCOURSE_SMTP_ADDRESS": smtp_address,
-            "DISCOURSE_SMTP_PORT": smtp_port,
-            "DISCOURSE_SMTP_USER_NAME": smtp_user_name,
-            "DISCOURSE_SMTP_PASSWORD": smtp_password,
-        }
+        if db_host == "":
+            data["env"] = {
+                "LANG": lang,
+                "DISCOURSE_DEFAULT_LOCALE": default_locale,
+                "DISCOURSE_HOSTNAME": hostname,
+                "DISCOURSE_DEVELOPER_EMAILS": developer_emails,
+                "DISCOURSE_SMTP_ADDRESS": smtp_address,
+                "DISCOURSE_SMTP_PORT": smtp_port,
+                "DISCOURSE_SMTP_USER_NAME": smtp_user_name,
+                "DISCOURSE_SMTP_PASSWORD": smtp_password,
+            }
+        else:
+            data["env"] = {
+                "LANG": lang,
+                "DISCOURSE_DEFAULT_LOCALE": default_locale,
+                "DISCOURSE_HOSTNAME": hostname,
+                "DISCOURSE_DEVELOPER_EMAILS": developer_emails,
+                "DISCOURSE_SMTP_ADDRESS": smtp_address,
+                "DISCOURSE_SMTP_PORT": smtp_port,
+                "DISCOURSE_SMTP_USER_NAME": smtp_user_name,
+                "DISCOURSE_SMTP_PASSWORD": smtp_password,
+                "DISCOURSE_DB_HOST": db_host,
+                "DISCOURSE_DB_PORT": db_port if db_port != "" else "5432",
+                "DISCOURSE_DB_NAME": db_name,
+                "DISCOURSE_DB_PASSWORD": db_password,
+                "DISCOURSE_DB_USERNAME": db_username,
+            }
+            # Remove postgres template
+            # Note the order might change in future -> find better way
+            data["templates"] = data["templates"][1:]
         print(dump(data, Dumper=Dumper))

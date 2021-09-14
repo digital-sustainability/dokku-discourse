@@ -24,6 +24,11 @@ discourse_create_app() {
   SMTP_PORT=$(fn-get-input "SMTP port?" "$(fn-get-env-config DISCOURSE_SMTP_PORT)")
   SMTP_USERNAME=$(fn-get-input "SMTP user name?" "$(fn-get-env-config DISCOURSE_SMTP_USER_NAME)")
   SMTP_PASSWORD=$(fn-get-input "SMTP password?" "$(fn-get-env-config DISCOURSE_SMTP_PASSWORD)")
+  DB_HOST=$(fn-get-input "Postgres server address?" "$(fn-get-env-config DISCOURSE_DB_HOST)")
+  DB_PORT=$(fn-get-input "Postgres server port?" "$(fn-get-env-config DISCOURSE_DB_PORT)")
+  DB_NAME=$(fn-get-input "Postgres database name?" "$(fn-get-env-config DISCOURSE_DB_NAME)")
+  DB_USERNAME=$(fn-get-input "Postgres database user name?" "$(fn-get-env-config DISCOURSE_DB_USERNAME)")
+  DB_PASSWORD=$(fn-get-input "Postgres database password?" "$(fn-get-env-config DISCOURSE_DB_PASSWORD)")
   DOCKER_ARGS=$(fn-get-input "Docker args for build image?" "$(fn-get-env-config DISCOURSE_DOCKER_ARGS)")
 
   local APP_STORAGE_ROOT="$STORAGE_ROOT/$APP_NAME"
@@ -35,7 +40,12 @@ discourse_create_app() {
     "$SMTP_ADDRESS" \
     "$SMTP_PORT" \
     "$SMTP_USERNAME" \
-    "$SMTP_PASSWORD"
+    "$SMTP_PASSWORD" \
+    "$DB_HOST" \
+    "$DB_PORT" \
+    "$DB_NAME" \
+    "$DB_USERNAME" \
+    "$DB_PASSWORD"
 
   fn-update-discourse-build-files
 
