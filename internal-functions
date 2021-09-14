@@ -122,6 +122,7 @@ fn-ps-stop() {
 
 fn-build-image() {
   declare APP_NAME="$1"
+  declare DOCKER_ARGS="$2"
   [[ -n $("$DOCKER_BIN" ps -q -f ancestor="dokku/$APP_NAME") ]] && fn-ps-stop "$APP_NAME"
   local APP_IMAGE_NAME="dokku/$APP_NAME:latest"
   dokku_log_info1 "Building the discourse docker image, this can take a while..."
@@ -130,7 +131,12 @@ fn-build-image() {
     dokku_log_fail "Discourse conainer config not found at location $CONTAINER_CONFIG_PATH"
   fi
   ln -sf "$CONTAINER_CONFIG_PATH" "$DISCOURSE_DOCKER_IMAGE_ROOT/containers/$CONTAINER_TYPE-$APP_NAME.yml"
-  "$DISCOURSE_DOCKER_IMAGE_ROOT/launcher" bootstrap "$CONTAINER_TYPE-$APP_NAME"
+  if [[ -z "$DOCKER_ARGS" ]]; then
+    "$DISCOURSE_DOCKER_IMAGE_ROOT/launcher" bootstrap "$CONTAINER_TYPE-$APP_NAME"
+  else
+    "$DISCOURSE_DOCKER_IMAGE_ROOT/launcher" bootstrap "$CONTAINER_TYPE-$APP_NAME" --docker-args "$DOCKER_ARGS"
+  fi
+
   local DISCOURSE_IMAGE_NAME="local_discourse/$CONTAINER_TYPE-$APP_NAME"
   "$DOCKER_BIN" tag "$DISCOURSE_IMAGE_NAME:latest" "$APP_IMAGE_NAME"
   "$DOCKER_BIN" rmi "$DISCOURSE_IMAGE_NAME"

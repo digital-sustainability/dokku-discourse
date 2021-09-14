@@ -24,6 +24,7 @@ discourse_create_app() {
   SMTP_PORT=$(fn-get-input "SMTP port?" "$(fn-get-env-config DISCOURSE_SMTP_PORT)")
   SMTP_USERNAME=$(fn-get-input "SMTP user name?" "$(fn-get-env-config DISCOURSE_SMTP_USER_NAME)")
   SMTP_PASSWORD=$(fn-get-input "SMTP password?" "$(fn-get-env-config DISCOURSE_SMTP_PASSWORD)")
+  DOCKER_ARGS=$(fn-get-input "Docker args for build image?" "$(fn-get-env-config DISCOURSE_DOCKER_ARGS)")
 
   local APP_STORAGE_ROOT="$STORAGE_ROOT/$APP_NAME"
 
@@ -38,7 +39,7 @@ discourse_create_app() {
 
   fn-update-discourse-build-files
 
-  fn-build-image "$APP_NAME"
+  fn-build-image "$APP_NAME" "$DOCKER_ARGS"
   fn-configure-app "$APP_NAME" "$HOSTNAME" "$APP_STORAGE_ROOT"
   fn-deploy-app "$APP_NAME"
   dokku_log_info1 "Data stored in $APP_STORAGE_ROOT"
