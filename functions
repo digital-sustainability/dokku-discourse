@@ -5,13 +5,7 @@ source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
 source "$PLUGIN_CORE_AVAILABLE_PATH/ps/functions"
 
 discourse_create_app() {
-  declare APP_NAME="$1" \
-    HOSTNAME="$2" \
-    DEVELOPER_EMAILS="$3" \
-    SMTP_ADDRESS="$4" \
-    SMTP_PORT="$5" \
-    SMTP_USERNAME="$6" \
-    SMTP_PASSWORD="$7"
+  declare APP_NAME="$1"
 
   ## TODO: call plugin functions instead of dokku
   if grep -qxF "$(dokku apps:list 2> /dev/null)" <<< "$APP_NAME"; then
@@ -24,12 +18,12 @@ discourse_create_app() {
   fn-create-default-discourse-container-config "$APP_NAME"
 
   [[ -z "$APP_NAME" ]] && dokku_log_fail "Missing app argument"
-  [[ -z "$HOSTNAME" ]] && HOSTNAME=$(fn-get-input "Hostname for your Discourse?" "$(fn-get-env-config DISCOURSE_HOSTNAME)")
-  [[ -z "$DEVELOPER_EMAILS" ]] && DEVELOPER_EMAILS=$(fn-get-input "Email address for admin account(s)?" "$(fn-get-env-config DISCOURSE_DEVELOPER_EMAILS)")
-  [[ -z "$SMTP_ADDRESS" ]] && SMTP_ADDRESS=$(fn-get-input "SMTP server address?" "$(fn-get-env-config DISCOURSE_SMTP_ADDRESS)")
-  [[ -z "$SMTP_PORT" ]] && SMTP_PORT=$(fn-get-input "SMTP port?" "$(fn-get-env-config DISCOURSE_SMTP_PORT)")
-  [[ -z "$SMTP_USERNAME" ]] && SMTP_USERNAME=$(fn-get-input "SMTP user name?" "$(fn-get-env-config DISCOURSE_SMTP_USER_NAME)")
-  [[ -z "$SMTP_PASSWORD" ]] && SMTP_PASSWORD=$(fn-get-input "SMTP password?" "$(fn-get-env-config DISCOURSE_SMTP_PASSWORD)")
+  HOSTNAME=$(fn-get-input "Hostname for your Discourse?" "$(fn-get-env-config DISCOURSE_HOSTNAME)")
+  DEVELOPER_EMAILS=$(fn-get-input "Email address for admin account(s)?" "$(fn-get-env-config DISCOURSE_DEVELOPER_EMAILS)")
+  SMTP_ADDRESS=$(fn-get-input "SMTP server address?" "$(fn-get-env-config DISCOURSE_SMTP_ADDRESS)")
+  SMTP_PORT=$(fn-get-input "SMTP port?" "$(fn-get-env-config DISCOURSE_SMTP_PORT)")
+  SMTP_USERNAME=$(fn-get-input "SMTP user name?" "$(fn-get-env-config DISCOURSE_SMTP_USER_NAME)")
+  SMTP_PASSWORD=$(fn-get-input "SMTP password?" "$(fn-get-env-config DISCOURSE_SMTP_PASSWORD)")
 
   local APP_STORAGE_ROOT="$STORAGE_ROOT/$APP_NAME"
 
