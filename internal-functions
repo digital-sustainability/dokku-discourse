@@ -60,13 +60,14 @@ fn-update-discourse-config-env() {
     DB_HOST="$8" \
     DB_PORT="$9"
     DB_NAME="${10}" \
-    DB_USERNAME="${11}"
-    DB_PASSWORD="${12}"
+    DB_USERNAME="${11}" \
+    DB_PASSWORD="${12}" \
+    DOCKER_ARGS="${13}"
 
   local CONFIG_FILE_PATH="$DOKKU_ROOT/$APP_NAME/$DISCOURSE_CONTAINER_CONFIG_NAME.yml"
   local UPDATE_ENV_BIN_PATH="$PLUGIN_AVAILABLE_PATH/discourse/containers/update-env"
   local UPDATED_CONFIG
-  UPDATED_CONFIG=$("$UPDATE_ENV_BIN_PATH" "$CONFIG_FILE_PATH" "$HOSTNAME" "$DEVELOPER_EMAILS" "$SMTP_ADDRESS" "$SMTP_PORT" "$SMTP_USER_NAME" "$SMTP_PASSWORD" "$DB_HOST" "$DB_PORT" "$DB_NAME" "$DB_USERNAME" "$DB_PASSWORD" 2> /dev/null)
+  UPDATED_CONFIG=$("$UPDATE_ENV_BIN_PATH" "$CONFIG_FILE_PATH" "$HOSTNAME" "$DEVELOPER_EMAILS" "$SMTP_ADDRESS" "$SMTP_PORT" "$SMTP_USER_NAME" "$SMTP_PASSWORD" "$DB_HOST" "$DB_PORT" "$DB_NAME" "$DB_USERNAME" "$DB_PASSWORD" "$DOCKER_ARGS" 2> /dev/null)
   [[ -z "$UPDATED_CONFIG" ]] && dokku_log_fail "Error setting env in config"
   echo "$UPDATED_CONFIG" > "$CONFIG_FILE_PATH"
   dokku_log_info1 "Updated '$APP_NAME' discourse env"
@@ -93,8 +94,9 @@ fn-update-discourse-container-config() {
     DB_HOST="$9" \
     DB_PORT="${10}"
     DB_NAME="${11}" \
-    DB_USERNAME="${12}"
-    DB_PASSWORD="${13}"
+    DB_USERNAME="${12}" \
+    DB_PASSWORD="${13}" \
+    DOCKER_ARGS="${14}"
 
   fn-update-discourse-config-env \
     "$APP_NAME" \
@@ -108,7 +110,8 @@ fn-update-discourse-container-config() {
     "$DB_PORT" \
     "$DB_NAME" \
     "$DB_USERNAME" \
-    "$DB_PASSWORD"
+    "$DB_PASSWORD" \
+    "$DOCKER_ARGS"
 
   fn-update-discourse-config-set-volumes "$APP_NAME" "$APP_STORAGE_ROOT"
 
@@ -180,9 +183,9 @@ fn-deploy-app() {
 
 fn-install-plugin() {
   declare APP_NAME="$1" PLUGIN_GIT_URL="$2"
+  local DOCKER_ARGS="$(fn-get-env-config DISCOURSE_DOCKER_ARGS)"
   fn-discourse-config-add-plugin "$APP_NAME" "$PLUGIN_GIT_URL"
-  local APP_STORAGE_ROOT="$STORAGE_ROOT/$APP_NAME"
-  fn-build-image "$APP_NAME" "$APP_STORAGE_ROOT"
+  fn-build-image "$APP_NAME" "$DOCKER_ARGS"
 }
 
 fn-get-run-args() {

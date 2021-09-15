@@ -24,6 +24,7 @@ if __name__ == "__main__":
     db_name = sys.argv[10]
     db_username = sys.argv[11]
     db_password = sys.argv[12]
+    docker_args = sys.argv[13]
 
     with open(config_file, "r") as f:
         data = load(f, Loader=Loader)
@@ -37,6 +38,7 @@ if __name__ == "__main__":
                 "DISCOURSE_SMTP_PORT": smtp_port,
                 "DISCOURSE_SMTP_USER_NAME": smtp_user_name,
                 "DISCOURSE_SMTP_PASSWORD": smtp_password,
+                "DISCOURSE_DOCKER_ARGS": docker_args,
             }
         else:
             data["env"] = {
@@ -53,6 +55,7 @@ if __name__ == "__main__":
                 "DISCOURSE_DB_NAME": db_name,
                 "DISCOURSE_DB_PASSWORD": db_password,
                 "DISCOURSE_DB_USERNAME": db_username,
+                "DISCOURSE_DOCKER_ARGS": docker_args,
             }
             # Remove postgres template
             # Note the order might change in future -> find better way

@@ -45,7 +45,8 @@ discourse_create_app() {
     "$DB_PORT" \
     "$DB_NAME" \
     "$DB_USERNAME" \
-    "$DB_PASSWORD"
+    "$DB_PASSWORD" \
+    "$DOCKER_ARGS"
 
   fn-update-discourse-build-files
 
