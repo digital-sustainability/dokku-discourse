@@ -1,0 +1,32 @@
+templates:
+  - "templates/redis.template.yml"
+  - "templates/web.template.yml"
+  - "templates/web.ratelimited.template.yml"
+params:
+  db_default_text_search_config: "pg_catalog.english"
+links:
+  link: { alias: '', name: '' }
+env:
+  LANG: en_US.UTF-8
+  DISCOURSE_DEFAULT_LOCALE: en
+  DISCOURSE_HOSTNAME: 'discourse.dokku.me'
+  DISCOURSE_DEVELOPER_EMAILS: 'me@example.com,you@example.com'
+  DISCOURSE_SMTP_ADDRESS: smtp.example.com
+  DISCOURSE_SMTP_PORT: 587
+  DISCOURSE_SMTP_USER_NAME: user@example.com
+  DISCOURSE_SMTP_PASSWORD: pa$$word
+  DISCOURSE_DB_HOST: localhost 
+  DISCOURSE_DB_PORT: 5432
+  DISCOURSE_DB_NAME: discourse
+  DISCOURSE_DB_USERNAME: postgres
+  DISCOURSE_DB_PASSWORD: pa$$word
+
+hooks:
+  after_code:
+    - exec:
+        cd: $home/plugins
+        cmd:
+          - git clone https://github.com/discourse/docker_manager.git
+run:
+  - exec: echo "Beginning of custom commands"
+  - exec: echo "End of custom commands"
