@@ -49,7 +49,7 @@ discourse_create_app() {
     [[ -z "$DB_NAME" ]] && DB_NAME=$(fn-get-input "Postgres database name?" "$(fn-get-env-config DISCOURSE_DB_NAME)")
     [[ -z "$DB_USERNAME" ]] && DB_USERNAME=$(fn-get-input "Postgres database user name?" "$(fn-get-env-config DISCOURSE_DB_USERNAME)")
     [[ -z "$DB_PASSWORD" ]] && DB_PASSWORD=$(fn-get-input "Postgres database password?" "$(fn-get-env-config DISCOURSE_DB_PASSWORD)")
-    [[ -z "$DB_LINK" ]] && DB_PASSWORD=$(fn-get-input "Postgres container link" "") 
+    [[ -z "$DB_LINK" ]] && DB_LINK=$(fn-get-input "Postgres container link" "") 
   fi
 
   local APP_STORAGE_ROOT="$STORAGE_ROOT/$APP_NAME"
