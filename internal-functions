@@ -43,7 +43,7 @@ fn-update-discourse-config-set-links() {
   local CONFIG_FILE_PATH="$DOKKU_ROOT/$APP_NAME/$DISCOURSE_CONTAINER_CONFIG_NAME.yml"
   local SET_VOLUMES_BIN_PATH="$PLUGIN_AVAILABLE_PATH/discourse/containers/set-links"
   local UPDATED_CONFIG
-  UPDATED_CONFIG=$("$SET_VOLUMES_BIN_PATH" "$CONFIG_FILE_PATH" "$APP_STORAGE_ROOT" "$DB_HOST" $DB_LINK"" 2> /dev/null)
+  UPDATED_CONFIG=$("$SET_VOLUMES_BIN_PATH" "$CONFIG_FILE_PATH" "$DB_HOST" $DB_LINK"" 2> /dev/null)
   [[ -z "$UPDATED_CONFIG" ]] && dokku_log_fail "Error setting links in config"
   echo "$UPDATED_CONFIG" > "$CONFIG_FILE_PATH"
   dokku_log_info1 "Updated '$APP_NAME' discourse links"
