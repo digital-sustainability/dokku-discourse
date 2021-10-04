@@ -1,7 +1,7 @@
 # dokku-discourse
 
-![Test](https://github.com/badsyntax/dokku-discourse/workflows/Test/badge.svg)
-![Publish](https://github.com/badsyntax/dokku-discourse/workflows/Publish/badge.svg)
+![Test](https://github.com/digital-sustainability/dokku-discourse/workflows/Test/badge.svg)
+![Publish](https://github.com/digital-sustainability/dokku-discourse/workflows/Publish/badge.svg)
 
 Manages discourse apps on your dokku server.
 
@@ -9,10 +9,10 @@ Manages discourse apps on your dokku server.
 
 ```sh
 # For dokku >= v0.22.0
-dokku plugin:install https://github.com/badsyntax/dokku-discourse.git
+dokku plugin:install https://github.com/digital-sustainability/dokku-discourse.git
 
 # For dokku < v0.22.0
-dokku plugin:install https://github.com/badsyntax/dokku-discourse.git --committish 0.2.1
+dokku plugin:install https://github.com/digital-sustainability/dokku-discourse.git --committish 0.2.1
 ```
 
 ## Plugin update
@@ -36,15 +36,64 @@ discourse:list                            # Lists discourse apps
 
 ### Create a new discourse app
 
-Each discourse app is a separate _standalone_ discourse instance.
+#### Standaone
+
+To setup a new discourse app as a separate _standalone_ discourse instance run
 
 ```sh
 dokku discourse:create discourse-app
 ```
 
+and choose _false_ in the first prompt.
+
 *A new docker image will be built and this process can take some time.*
 
 You'll be prompted for various discourse configuration values.
+
+#### External Database
+
+To setup a new discourse app with an external database first create a container
+
+```sh
+dokku apps:create discourse-app
+```
+
+use [dokku-postgres](https://github.com/dokku/dokku-postgres) to create a new postgres service
+
+```sh
+dokku postgres:create discourse-db
+```
+
+link the container with the postgres service
+
+```sh
+dokku postgres:link discourse-db discourse-app
+```
+
+this will set an env DATABASE_URL with the following structure:
+
+```sh
+postgres://postgres:<DATABSE_PASSWORD>@dokku-postgres-discourse-db:5432/discourse_db
+```
+
+you'll be asked to specify a docker link during setup, to get the necessary information run
+
+```sh
+dokku docker-options:report discourse-app
+```
+you should get something like:
+
+```sh
+--link dokku.postgres.discourse-db:dokku-postgres-discourse-db 
+```
+
+finally start the setup and choose _true_ in the first prompt
+
+```sh
+dokku discourse:create discourse-app
+```
+
+use the database information from `DATABASE_URL` and `docker-options` to complete the setup.
 
 Data will be stored in location `/var/lib/dokku/data/storage/APP_NAME`.
 
@@ -54,11 +103,13 @@ Continue with the offical [discourse install instructions](https://github.com/di
 
 ### Customise the discourse container config
 
-A discourse container config file is created when a discourse app is created. The config is based on [standalone.yml](https://github.com/discourse/discourse_docker/blob/master/samples/standalone.yml).
+A discourse container config file is created when a discourse app is created. Depeding on your chooise the config is based on [standalone.yml](https://github.com/discourse/discourse_docker/blob/master/samples/standalone.yml) or [web_only](https://github.com/discourse/discourse_docker/blob/master/samples/web_only.yml) including the redis template.
 
-You can edit the config at `/home/dokku/APP_NAME/discourse_standalone.yml`. Don't make any changes to the `volumes` section, but feel free to change anything else.
+You can edit the config at `/home/dokku/APP_NAME/discourse_standalone.yml` or `/home/dokku/APP_NAME/discourse_web_and_redis.yml`. Don't make any changes to the `volumes` section, but feel free to change anything else. 
 
-After making change be sure to run `dokku discourse:create <app>` to rebuild and re-deploy the discourse app.
+*Important:* Changes to the `env` section will overwritten.
+
+After making change be sure to run `dokku discourse:create <app>` to rebuild and re-deploy the discourse app. 
 
 ### Upgrade a discourse app
 
@@ -138,6 +189,7 @@ To complete the restoration, you'll need install plugins that were previously in
 
 - https://medium.com/batary/deploying-discourse-with-dokku-5eec28e2ad8b
 - https://gist.github.com/julienma/a101a72fdd97932bf28909633f45c7be
+- https://github.com/badsyntax/dokku-discourse
 
 ## Development
 
