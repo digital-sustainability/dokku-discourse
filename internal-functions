@@ -38,6 +38,17 @@ fn-update-discourse-build-files() {
   fi
 }
 
+fn-update-discourse-config-set-links() {
+  declare APP_NAME="$1" APP_STORAGE_ROOT="$2" DB_HOST="$3" DB_LINK="$4"
+  local CONFIG_FILE_PATH="$DOKKU_ROOT/$APP_NAME/$DISCOURSE_CONTAINER_CONFIG_NAME.yml"
+  local SET_VOLUMES_BIN_PATH="$PLUGIN_AVAILABLE_PATH/discourse/containers/set-links"
+  local UPDATED_CONFIG
+  UPDATED_CONFIG=$("$SET_VOLUMES_BIN_PATH" "$CONFIG_FILE_PATH" "$DB_HOST" $DB_LINK"" 2> /dev/null)
+  [[ -z "$UPDATED_CONFIG" ]] && dokku_log_fail "Error setting links in config"
+  echo "$UPDATED_CONFIG" > "$CONFIG_FILE_PATH"
+  dokku_log_info1 "Updated '$APP_NAME' discourse links"
+}
+
 fn-update-discourse-config-set-volumes() {
   declare APP_NAME="$1" APP_STORAGE_ROOT="$2"
   local CONFIG_FILE_PATH="$DOKKU_ROOT/$APP_NAME/$DISCOURSE_CONTAINER_CONFIG_NAME.yml"
@@ -56,11 +67,17 @@ fn-update-discourse-config-env() {
     SMTP_ADDRESS="$4" \
     SMTP_PORT="$5" \
     SMTP_USER_NAME="$6" \
-    SMTP_PASSWORD="$7"
+    SMTP_PASSWORD="$7" \
+    DB_HOST="$8" \
+    DB_PORT="$9"
+    DB_NAME="${10}" \
+    DB_USERNAME="${11}" \
+    DB_PASSWORD="${12}" 
+
   local CONFIG_FILE_PATH="$DOKKU_ROOT/$APP_NAME/$DISCOURSE_CONTAINER_CONFIG_NAME.yml"
   local UPDATE_ENV_BIN_PATH="$PLUGIN_AVAILABLE_PATH/discourse/containers/update-env"
   local UPDATED_CONFIG
-  UPDATED_CONFIG=$("$UPDATE_ENV_BIN_PATH" "$CONFIG_FILE_PATH" "$HOSTNAME" "$DEVELOPER_EMAILS" "$SMTP_ADDRESS" "$SMTP_PORT" "$SMTP_USER_NAME" "$SMTP_PASSWORD" 2> /dev/null)
+  UPDATED_CONFIG=$("$UPDATE_ENV_BIN_PATH" "$CONFIG_FILE_PATH" "$HOSTNAME" "$DEVELOPER_EMAILS" "$SMTP_ADDRESS" "$SMTP_PORT" "$SMTP_USER_NAME" "$SMTP_PASSWORD" "$DB_HOST" "$DB_PORT" "$DB_NAME" "$DB_USERNAME" "$DB_PASSWORD" 2> /dev/null)
   [[ -z "$UPDATED_CONFIG" ]] && dokku_log_fail "Error setting env in config"
   echo "$UPDATED_CONFIG" > "$CONFIG_FILE_PATH"
   dokku_log_info1 "Updated '$APP_NAME' discourse env"
@@ -83,7 +100,13 @@ fn-update-discourse-container-config() {
     SMTP_ADDRESS="$5" \
     SMTP_PORT="$6" \
     SMTP_USER_NAME="$7" \
-    SMTP_PASSWORD="$8"
+    SMTP_PASSWORD="$8" \
+    DB_HOST="$9" \
+    DB_PORT="${10}"
+    DB_NAME="${11}" \
+    DB_USERNAME="${12}" \
+    DB_PASSWORD="${13}" \
+    DB_LINK="${14}"
 
   fn-update-discourse-config-env \
     "$APP_NAME" \
@@ -92,9 +115,18 @@ fn-update-discourse-container-config() {
     "$SMTP_ADDRESS" \
     "$SMTP_PORT" \
     "$SMTP_USER_NAME" \
-    "$SMTP_PASSWORD"
+    "$SMTP_PASSWORD" \
+    "$DB_HOST" \
+    "$DB_PORT" \
+    "$DB_NAME" \
+    "$DB_USERNAME" \
+    "$DB_PASSWORD" 
 
   fn-update-discourse-config-set-volumes "$APP_NAME" "$APP_STORAGE_ROOT"
+
+  if [ $CONTAINER_TYPE = "web_and_redis" ]; then
+    fn-update-discourse-config-set-links "$APP_NAME" "$APP_STORAGE_ROOT" "$DB_HOST" "$DB_LINK"
+  fi
 
   local CONFIG_FILE_PATH="$DOKKU_ROOT/$APP_NAME/$DISCOURSE_CONTAINER_CONFIG_NAME.yml"
   dokku_log_info2 "Container config updated at location $CONFIG_FILE_PATH"
@@ -192,7 +224,7 @@ fn-configure-app() {
 
   local RUN_ARGS MAC_ADDRESS SHM_SIZE ENV_VARS
 
-  RUN_ARGS=$(fn-get-run-args "$APP_NAME" 2>&1)
+  RUN_ARGS=$(fn-get-run-args "$APP_NAME" 2>&1 >/dev/null)
   MAC_ADDRESS=$(echo "$RUN_ARGS" | sed -r 's/.*--mac-address(=| )([^ ]+).*/\2/')
   SHM_SIZE=$(echo "$RUN_ARGS" | sed -r 's/.*--shm-size(=| )([^ ]+).*/\2/')
   ENV_VARS=$(fn-get-env-vars-from-run-args "$RUN_ARGS")

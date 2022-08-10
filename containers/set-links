@@ -1,0 +1,27 @@
+#!/usr/bin/python3
+
+import sys
+from yaml import load, dump
+
+try:
+    from yaml import CLoader as Loader, CDumper as Dumper
+except ImportError:
+    from yaml import Loader, Dumper
+
+if __name__ == "__main__":
+    config_file = sys.argv[1]
+    alias = sys.argv[2]
+    name = sys.argv[3]
+
+    with open(config_file, "r") as f:
+        data = load(f, Loader=Loader)
+        links = [
+            {
+                "link": {
+                    "alias": alias,
+                    "name": name,
+                }
+            },
+        ]
+        data['links'] = links
+        print(dump(data, Dumper=Dumper))
