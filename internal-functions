@@ -192,6 +192,13 @@ fn-install-plugin() {
   declare APP_NAME="$1" PLUGIN_GIT_URL="$2"
   fn-discourse-config-add-plugin "$APP_NAME" "$PLUGIN_GIT_URL"
   local APP_STORAGE_ROOT="$STORAGE_ROOT/$APP_NAME"
+
+  # if DATABASE_URL is present we're using an external DB
+  local DATABASE_URL=$(config_get "$APP_NAME" "DATABASE_URL")
+  if [ -n "$DATABASE_URL" ]; then
+    export CONTAINER_TYPE="web_and_redis"
+    export DISCOURSE_CONTAINER_CONFIG_NAME="discourse_$CONTAINER_TYPE"
+  fi
   fn-build-image "$APP_NAME" "$APP_STORAGE_ROOT"
 }
 
@@ -203,6 +210,14 @@ fn-get-run-args() {
 fn-upgrade-app() {
   declare APP_NAME="$1"
   fn-update-discourse-build-files
+
+  # if DATABASE_URL is present we're using an external DB
+  local DATABASE_URL=$(config_get "$APP_NAME" "DATABASE_URL")
+  if [ -n "$DATABASE_URL" ]; then
+    export CONTAINER_TYPE="web_and_redis"
+    export DISCOURSE_CONTAINER_CONFIG_NAME="discourse_$CONTAINER_TYPE"
+  fi
+
   fn-build-image "$APP_NAME"
 }
 
